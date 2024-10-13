@@ -1,0 +1,31 @@
+# Learn more about building a configuration: https://promptfoo.dev/docs/configuration/guide
+description: "Find salesforce company"
+
+prompts:
+  - "{{company_name}}はセールスフォースを使っていますか？WEB上の記事や求人情報などで、{{company_name}}がセールスフォースを使っている（セールスフォース担当という言葉があったり、中の人のプロフィールにセールスフォースを使っている記述がある、部署があるなど）記事があれば探してください。\n出力は「ほぼ確実に使っている」、「使っているかも」、「使っている記述が見つけられない」の3段階と、その記事のURLを出力してください。"
+
+
+providers:
+  - id: openai:gpt-4o
+    config:
+      temperature: 0
+      max_tokens: 256
+      apiKeyEnvar: OPENAI_API_KEY      
+  - id: openai:chat:llama-3.1-sonar-large-128k-online
+    config:
+      max_tokens: 256
+      apiBaseUrl: https://api.perplexity.ai    
+      apiKeyEnvar: PERPLEXITY_API_KEY
+      frequency_penalty: 1
+
+tests:
+  - vars:
+      company_name: 株式会社LayerX
+    assert:
+      - type: llm-rubric
+        value: "Answer 「ほぼ確実に使っている」 or 「使っているかも」 with a URLs, because the company is using Salesforce."
+  - vars:
+      company_name: Google合同会社
+    assert:
+      - type: llm-rubric
+        value: "Answer 「使っている記述が見つけられない」 because the company is not using Salesforce."
